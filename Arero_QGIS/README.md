@@ -30,6 +30,26 @@ Geographic datasets often contain many boundaries, routes, and other features. I
 
 Each processed feature has an index, geometry type, source geometry, optional map-ready geometry, attributes, source and projected CRS metadata, a nullable measurement and unit, and processing/conversion errors when applicable. The browser dashboard summarizes measurable area and length totals, supports feature inspection, and downloads CSV or GeoJSON results.
 
+## Screenshots
+
+### Upload and processing
+
+![Arero_QGIS upload screen](docs/images/upload-screen.png)
+
+Choose a KML file or zipped Shapefile to calculate polygon areas and route lengths.
+
+### Map dashboard
+
+![Arero_QGIS map dashboard with feature list and measurements](docs/images/dashboard-map-overview.png)
+
+Review the processed dataset on the map, browse features, and export results.
+
+### Feature inspection
+
+![Arero_QGIS map with a selected feature and its attributes](docs/images/feature-inspection.png)
+
+Select a feature to highlight its geometry and inspect its measurement, CRS, and attributes.
+
 ## Implemented Features
 
 - Upload a `.kml` file or a `.zip` containing exactly one Shapefile, with a maximum uploaded size of 50 MiB.
