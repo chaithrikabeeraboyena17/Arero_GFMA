@@ -12,6 +12,7 @@ The application lives in [`Arero_QGIS/`](Arero_QGIS/). The browser interface is 
 ## Table of Contents
 
 - [Overview](#overview)
+- [Screenshots](#screenshots)
 - [Features](#features)
 - [Technology Stack](#technology-stack)
 - [Architecture and Processing Workflow](#architecture-and-processing-workflow)
@@ -38,6 +39,28 @@ Geographic datasets often contain many boundaries and routes. Measuring each pol
 **Intended users:** GIS analysts, survey teams, planners, and developers who need quick, repeatable measurements from KML or Shapefile exchange data.
 
 **Workflow:** upload a file → the API validates and parses it → each feature is transformed and measured → results are saved to the database → the dashboard shows the map, table, and totals → results can be exported as CSV or GeoJSON.
+
+## Screenshots
+
+The screenshots are stored in `Arero_QGIS/docs/images/`, so they render from this repository-level README as well as the project README.
+
+### Upload screen
+
+![Upload screen for selecting a KML or zipped Shapefile](Arero_QGIS/docs/images/upload-screen.png)
+
+Select or drop a supported file, then choose **Process file**. The dashboard checks the file before upload and shows upload progress.
+
+### Map dashboard
+
+![Map dashboard showing processed features, measurements, and feature list](Arero_QGIS/docs/images/dashboard-map-overview.png)
+
+Browse the mapped features and measurements, search or filter the feature list, and export results.
+
+### Feature inspection
+
+![Selected map feature with measurement, coordinate reference systems, and attributes](Arero_QGIS/docs/images/feature-inspection.png)
+
+Select a map feature or table row to highlight it and inspect its details.
 
 ## Features
 
@@ -142,8 +165,12 @@ sequenceDiagram
     participant S as storage_service
     participant DB as Database
 
-    User->>UI: Choose .kml or .zip
+    User->>UI: Select or drop .kml or .zip
+    UI->>UI: Check extension, non-empty file, and 50 MiB limit
+    UI-->>User: Show selected file and enable Process file
+    User->>UI: Click Process file
     UI->>R: POST /api/files/ (multipart "file")
+    UI-->>User: Show upload progress and allow cancel
     R->>R: Check extension, read at most 50 MiB + 1 byte
     R->>F: process_uploaded_file(filename, content)
     F->>F: Write to temp dir; safe ZIP extraction if .zip
@@ -153,9 +180,9 @@ sequenceDiagram
     M-->>F: CRS text + processed features (with per-feature errors)
     F-->>R: result (temp dir deleted)
     R->>S: save_processed_file(uuid, filename, crs, features)
-    S->>DB: CREATE TABLE IF NOT EXISTS; INSERT files + features; COMMIT
+    S->>DB: Create tables if needed, insert files and features, then commit
     R-->>UI: 201 UploadResponse (id, features)
-    UI-->>User: Map, feature table, totals, export buttons
+    UI-->>User: Show map, feature table, totals, export buttons
 ```
 
 ### Retrieval and export flow
