@@ -157,32 +157,30 @@ flowchart TB
 
 ```mermaid
 sequenceDiagram
-    actor User
-    participant UI as Browser dashboard
-    participant R as routes/files.py
-    participant F as file_service
-    participant M as measurement_service
-    participant S as storage_service
-    participant DB as Database
+    participant User
+    participant Browser
+    participant API
+    participant Files
+    participant Measure
+    participant Storage
+    participant Database
 
-    User->>UI: Select or drop .kml or .zip
-    UI->>UI: Check extension, non-empty file, and 50 MiB limit
-    UI-->>User: Show selected file and enable Process file
-    User->>UI: Click Process file
-    UI->>R: POST /api/files/ (multipart "file")
-    UI-->>User: Show upload progress and allow cancel
-    R->>R: Check extension, read at most 50 MiB + 1 byte
-    R->>F: process_uploaded_file(filename, content)
-    F->>F: Write to temp dir; safe ZIP extraction if .zip
-    F->>F: Parse KML (XML) or Shapefile (pyshp + .prj)
-    F->>M: process_features(features, source_crs)
-    M->>M: Transform to EPSG:4326, pick UTM zone, compute area / length
-    M-->>F: CRS text + processed features (with per-feature errors)
-    F-->>R: result (temp dir deleted)
-    R->>S: save_processed_file(uuid, filename, crs, features)
-    S->>DB: Create tables if needed, insert files and features, then commit
-    R-->>UI: 201 UploadResponse (id, features)
-    UI-->>User: Show map, feature table, totals, export buttons
+    User->>Browser: Select a KML or ZIP file
+    Browser->>Browser: Check file type and size
+    Browser-->>User: Show selected file and enable upload
+    User->>Browser: Start upload
+    Browser->>API: Send upload request
+    Browser-->>User: Show upload progress and allow cancel
+    API->>Files: Validate and parse file
+    Files->>Measure: Process feature geometries
+    Measure-->>Files: Return measurements and map geometries
+    Files-->>API: Return processed features
+    API->>Storage: Save file and feature results
+    Storage->>Database: Create tables if needed and insert records
+    Database-->>Storage: Commit changes
+    Storage-->>API: Confirm saved results
+    API-->>Browser: Return upload response
+    Browser-->>User: Show map and feature dashboard
 ```
 
 ### Retrieval and export flow
